@@ -1,5 +1,6 @@
 
 import java.sql.*;
+import java.util.ArrayList;
 
 
 /**
@@ -60,5 +61,84 @@ public class ProductTable {
 		}
 										
 	}
+	
+	
+	public static ResultSet queryProductTable(Connection conn,
+											  ArrayList<String> columns,
+											  ArrayList<String> whereClauses){
+		
+		StringBuilder sb = new StringBuilder();
+		
+		
+		sb.append("SELECT ");
+		
+		if(columns.isEmpty()){
+			sb.append("* ");
+		}
+		else {
+			for(int i = 0; i < columns.size(); i++){
+				if(i != columns.size() - 1){
+					sb.append(columns.get(i) + ", ");
+				}
+				else{
+					sb.append(columns.get(i) + " ");
+				}
+			}
+		}
+		
+		sb.append("FROM product ");
+		
+		if(!whereClauses.isEmpty()){
+			sb.append("WHERE ");
+			for(int i = 0; i < whereClauses.size(); i++){
+				if(i != whereClauses.size() - 1){
+					sb.append(whereClauses.get(i) + " AND ");
+				}
+				else{
+					sb.append(whereClauses.get(i));
+				}
+			}
+		}
+		
+		sb.append(";");
+		System.out.println("Query: " + sb.toString());
+		try{ 
+			Statement stmt = conn.createStatement();
+			return stmt.executeQuery(sb.toString());
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	
+	public static void printProductTable(Connection conn){
+		String query = "SELECT * FROM product;";
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet result = stmt.executeQuery(query);
+			
+			while(result.next()){
+				System.out.printf("Product %d: %s %s %s %s %f",
+								  result.getInt(1),
+								  result.getString(2),
+								  result.getString(3),
+								  result.getString(4),
+								  result.getString(5),
+								  result.getDouble(6));
+			}
+			
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 }
