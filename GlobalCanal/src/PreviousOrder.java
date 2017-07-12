@@ -10,21 +10,24 @@ public class PreviousOrder {
 	int dateOfPurchase; //YYYYMMDD
 	int dateOfShipment; //^^
 	double totalCost;
-	int payment_ID;
-	int shipping_ID;
+	int p_ID;
+	int s_ID;
+	int u_ID;
 	
 	public PreviousOrder(int id,
 						 int dateOfPurchase,
 						 int dateOfShipment,
 						 double totalCost,
 						 int payment_ID,
-						 int shipping_ID){
+						 int shipping_ID,
+						 int user_ID){
 		this.id = id;
 		this.dateOfPurchase = dateOfPurchase;
 		this.dateOfShipment = dateOfShipment;
 		this.totalCost = totalCost;
-		this.payment_ID = payment_ID;
-		this.shipping_ID = shipping_ID;
+		this.p_ID = payment_ID;
+		this.s_ID = shipping_ID;
+		this.u_ID = user_ID;
 		
 	}
 	
@@ -45,11 +48,15 @@ public class PreviousOrder {
 	}
 	
 	public int getPaymentID(){
-		return payment_ID;
+		return p_ID;
 	}
 	
 	public int getShippingID(){
-		return shipping_ID;
+		return s_ID;
+	}
+	
+	public int getUserID(){
+		return u_ID;
 	}
 	
 }

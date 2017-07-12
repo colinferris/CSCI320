@@ -114,7 +114,7 @@ public class PhoneNumberTable {
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("PhoneNumber %d: %d",
+				System.out.printf("PhoneNumber %d: %d\n",
 								  result.getInt(1),
 								  result.getInt(2));
 			}

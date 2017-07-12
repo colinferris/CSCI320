@@ -5,12 +5,12 @@ import java.util.ArrayList;
 
 /**
  * 
- * Class to make and manipulate a paymentmethod table
+ * Class to make and manipulate a orderedproduct table
  *
  */
-public class PaymentMethodTable {
+public class OrderedProductTable {
 
-	public static void populatePaymentMethodTableFromCSV(Connection conn,
+	public static void populateOrderedProductTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
 		
 		/*
@@ -24,18 +24,14 @@ public class PaymentMethodTable {
 		
 	}
 	
-	public static void createPaymentMethodTable(Connection conn){
+	public static void createOrderedProductTable(Connection conn){
 		try{
-			String query = "CREATE TABLE IF NOT EXISTS paymentmethod("
-					+ "U_ID INT,"
-					+ "P_ID INT,"
-					+ "CNAME VARCHAR (255),"
-					+ "CNUM INT,"
-					+ "EXPYEAR INT,"
-					+ "EXPMONTH INT,"
-					+ "SCODE INT"
-					+ "PRIMARY KEY (U_ID, P_ID)"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+			String query = "CREATE TABLE IF NOT EXISTS orderedproduct("
+					+ "ORDER_ID INT,"
+					+ "PRODUCT_ID INT,"
+					+ "PRIMARY KEY (ORDER_ID, PRODUCT_ID),"
+					+ "FOREIGN KEY (ORDER_ID) REFERENCES previousorder(ORDER_ID),"
+					+ "FOREIGN KEY (PRODUCT_ID) REFERENCES product(PRODUCT_ID),"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -45,18 +41,13 @@ public class PaymentMethodTable {
 		}
 	}
 	
-	public static void addPaymentMethod(Connection conn,
-								  int U_id,
-								  int p_id,
-								  String cName,
-								  int cNum,
-								  int expYear,
-								  int expMonth,
-								  int sCode){
+	public static void addOrderedProduct(Connection conn,
+								  int order_ID,
+								  int product_ID){
 		
-		String query = String.format("INSERT INTO paymentmethod "
-								   + "VALUES (%d,\'%d\',\'%s\',\'%d\',\'%d\',\'%d\',\'%d\');",
-									 U_id, p_id, cName, cNum, expYear, expMonth, sCode);
+		String query = String.format("INSERT INTO orderedproduct "
+								   + "VALUES (%d,\'%d\');",
+									 order_ID, product_ID);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -67,7 +58,7 @@ public class PaymentMethodTable {
 	}
 	
 	
-	public static ResultSet queryPaymentMethodTable(Connection conn,
+	public static ResultSet queryOrderedProductTable(Connection conn,
 											  ArrayList<String> columns,
 											  ArrayList<String> whereClauses){
 		
@@ -90,7 +81,7 @@ public class PaymentMethodTable {
 			}
 		}
 		
-		sb.append("FROM paymentmethod ");
+		sb.append("FROM orderedproduct ");
 		
 		if(!whereClauses.isEmpty()){
 			sb.append("WHERE ");
@@ -117,21 +108,16 @@ public class PaymentMethodTable {
 	}
 	
 	
-	public static void printPaymentMethodTable(Connection conn){
-		String query = "SELECT * FROM paymentmethod;";
+	public static void printOrderedProductTable(Connection conn){
+		String query = "SELECT * FROM orderedproduct;";
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("PaymentMethod %d %d: %s %d %d %d %d\n",
+				System.out.printf("OrderedProduct %d: %d\n",
 								  result.getInt(1),
-								  result.getInt(2),
-								  result.getString(3),
-								  result.getInt(4),
-								  result.getInt(5),
-								  result.getInt(6),
-								  result.getInt(7));
+								  result.getInt(2));
 			}
 			
 		} catch (SQLException e){

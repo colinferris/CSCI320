@@ -1,16 +1,15 @@
-
 import java.sql.*;
 import java.util.ArrayList;
 
 
 /**
  * 
- * Class to make and manipulate a paymentmethod table
+ * Class to make and manipulate a previousorder table
  *
  */
-public class PaymentMethodTable {
+public class PreviousOrderTable {
 
-	public static void populatePaymentMethodTableFromCSV(Connection conn,
+	public static void populatePreviousOrderTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
 		
 		/*
@@ -24,17 +23,17 @@ public class PaymentMethodTable {
 		
 	}
 	
-	public static void createPaymentMethodTable(Connection conn){
+	public static void createPreviousOrderTable(Connection conn){
 		try{
-			String query = "CREATE TABLE IF NOT EXISTS paymentmethod("
-					+ "U_ID INT,"
+			String query = "CREATE TABLE IF NOT EXISTS previousorder("
+					+ "ID INT,"
+					+ "DATEOFPURCHASE INT,"
+					+ "DATEOFSHIPMENT INT,"
+					+ "TOTALCOST NUMERIC(8,2),"
 					+ "P_ID INT,"
-					+ "CNAME VARCHAR (255),"
-					+ "CNUM INT,"
-					+ "EXPYEAR INT,"
-					+ "EXPMONTH INT,"
-					+ "SCODE INT"
-					+ "PRIMARY KEY (U_ID, P_ID)"
+					+ "S_ID INT,"
+					+ "U_ID INT,"
+					+ "PRIMARY KEY (ID),"
 					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
 					+ ");";
 			
@@ -45,18 +44,18 @@ public class PaymentMethodTable {
 		}
 	}
 	
-	public static void addPaymentMethod(Connection conn,
-								  int U_id,
-								  int p_id,
-								  String cName,
-								  int cNum,
-								  int expYear,
-								  int expMonth,
-								  int sCode){
+	public static void addPreviousOrder(Connection conn,
+								  int id,
+								  int dateOfPurchase,
+								  int dateOfShipment,
+								  double totalCost,
+								  int p_ID,
+								  int s_ID,
+								  int u_ID){
 		
-		String query = String.format("INSERT INTO paymentmethod "
-								   + "VALUES (%d,\'%d\',\'%s\',\'%d\',\'%d\',\'%d\',\'%d\');",
-									 U_id, p_id, cName, cNum, expYear, expMonth, sCode);
+		String query = String.format("INSERT INTO previousorder "
+								   + "VALUES (%d,\'%d\',\'%d\',\'%f\',\'%d\',\'%d\',\'%d\');",
+									 id, dateOfPurchase, dateOfShipment, totalCost, p_ID, s_ID, u_ID);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -67,7 +66,7 @@ public class PaymentMethodTable {
 	}
 	
 	
-	public static ResultSet queryPaymentMethodTable(Connection conn,
+	public static ResultSet queryPreviousOrderTable(Connection conn,
 											  ArrayList<String> columns,
 											  ArrayList<String> whereClauses){
 		
@@ -90,7 +89,7 @@ public class PaymentMethodTable {
 			}
 		}
 		
-		sb.append("FROM paymentmethod ");
+		sb.append("FROM previousorder ");
 		
 		if(!whereClauses.isEmpty()){
 			sb.append("WHERE ");
@@ -117,18 +116,18 @@ public class PaymentMethodTable {
 	}
 	
 	
-	public static void printPaymentMethodTable(Connection conn){
-		String query = "SELECT * FROM paymentmethod;";
+	public static void printPreviousOrderTable(Connection conn){
+		String query = "SELECT * FROM previousorder;";
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("PaymentMethod %d %d: %s %d %d %d %d\n",
+				System.out.printf("PreviousOrder %d: %d %d %f %d %d %d\n",
 								  result.getInt(1),
 								  result.getInt(2),
-								  result.getString(3),
-								  result.getInt(4),
+								  result.getInt(3),
+								  result.getDouble(4),
 								  result.getInt(5),
 								  result.getInt(6),
 								  result.getInt(7));

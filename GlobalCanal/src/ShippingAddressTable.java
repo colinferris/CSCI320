@@ -126,7 +126,7 @@ public class ShippingAddressTable {
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("ShippingAddress %d %d: %s %s %s %s %s %d",
+				System.out.printf("ShippingAddress %d %d: %s %s %s %s %s %d\n",
 								  result.getInt(1),
 								  result.getInt(2),
 								  result.getString(3),

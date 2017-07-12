@@ -121,7 +121,7 @@ public class ProductTable {
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("Product %d: %s %s %s %s %f",
+				System.out.printf("Product %d: %s %s %s %s %f\n",
 								  result.getInt(1),
 								  result.getString(2),
 								  result.getString(3),

@@ -113,7 +113,7 @@ public class ProductCategoryTable {
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("ProductCategory %d: %s",
+				System.out.printf("ProductCategory %d: %s\n",
 								  result.getInt(1),
 								  result.getString(2));
 			}
