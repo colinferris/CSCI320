@@ -1,15 +1,16 @@
+
 import java.sql.*;
 import java.util.ArrayList;
 
 
 /**
  * 
- * Class to make and manipulate a productcategory table
+ * Class to make and manipulate a phonenumber table
  *
  */
-public class ProductCategoryTable {
+public class PhoneNumberTable {
 
-	public static void populateProductCategoryTableFromCSV(Connection conn,
+	public static void populatePhoneNumberTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
 		
 		/*
@@ -23,13 +24,13 @@ public class ProductCategoryTable {
 		
 	}
 	
-	public static void createProductCategoryTable(Connection conn){
+	public static void createPhoneNumberTable(Connection conn){
 		try{
-			String query = "CREATE TABLE IF NOT EXISTS productcategory("
-					+ "P_ID INT,"
-					+ "NAME VARCHAR (255),"
-					+ "PRIMARY KEY (P_ID, NAME),"
-					+ "FOREIGN KEY (P_ID) REFERENCES product(P_ID)"
+			String query = "CREATE TABLE IF NOT EXISTS phonenumber("
+					+ "U_ID INT,"
+					+ "PNUMBER int,"
+					+ "PRIMARY KEY (U_ID, PNUMBER),"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -39,13 +40,13 @@ public class ProductCategoryTable {
 		}
 	}
 	
-	public static void addProductCategory(Connection conn,
-								  int p_id,
-								  String name){
+	public static void addPhoneNumber(Connection conn,
+								  int id,
+								  int pNumber){
 		
-		String query = String.format("INSERT INTO product "
-								   + "VALUES (%d,\'%s\');",
-									 p_id, name);
+		String query = String.format("INSERT INTO phonenumber "
+								   + "VALUES (%d,\'%d\');",
+									 id, pNumber);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -56,7 +57,7 @@ public class ProductCategoryTable {
 	}
 	
 	
-	public static ResultSet queryProductCategoryTable(Connection conn,
+	public static ResultSet queryPhoneNumberTable(Connection conn,
 											  ArrayList<String> columns,
 											  ArrayList<String> whereClauses){
 		
@@ -79,7 +80,7 @@ public class ProductCategoryTable {
 			}
 		}
 		
-		sb.append("FROM productcategory ");
+		sb.append("FROM phonenumber ");
 		
 		if(!whereClauses.isEmpty()){
 			sb.append("WHERE ");
@@ -106,16 +107,16 @@ public class ProductCategoryTable {
 	}
 	
 	
-	public static void printProductCategoryTable(Connection conn){
-		String query = "SELECT * FROM productcategory;";
+	public static void printPhoneNumberTable(Connection conn){
+		String query = "SELECT * FROM phonenumber;";
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("ProductCategory %d: %s",
+				System.out.printf("PhoneNumber %d: %d",
 								  result.getInt(1),
-								  result.getString(2));
+								  result.getInt(2));
 			}
 			
 		} catch (SQLException e){
