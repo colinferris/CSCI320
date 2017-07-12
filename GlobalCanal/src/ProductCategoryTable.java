@@ -1,4 +1,3 @@
-
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -8,9 +7,9 @@ import java.util.ArrayList;
  * Class to make and manipulate a product table
  *
  */
-public class ProductTable {
+public class ProductCategoryTable {
 
-	public static void populateProductTableFromCSV(Connection conn,
+	public static void populateProductCategoryTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
 		
 		/*
@@ -24,16 +23,13 @@ public class ProductTable {
 		
 	}
 	
-	public static void createProductTable(Connection conn){
+	public static void createProductCategoryTable(Connection conn){
 		try{
-			String query = "CREATE TABLE IF NOT EXISTS product("
-					+ "ID INT,"
+			String query = "CREATE TABLE IF NOT EXISTS productcategory("
+					+ "P_ID INT,"
 					+ "NAME VARCHAR (255),"
-					+ "DIMENSIONS VARCHAR (255),"
-					+ "WEIGHT VARCHAR (255),"
-					+ "C_ORIGIN VARCHAR (255),"
-					+ "PRICE NUMERIC (8,2),"
-					+ "PRIMARY KEY (ID)"
+					+ "PRIMARY KEY (P_ID, NAME),"
+					+ "FOREIGN KEY (P_ID) REFERENCES product(P_ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -43,17 +39,13 @@ public class ProductTable {
 		}
 	}
 	
-	public static void addProduct(Connection conn,
-								  int id,
-								  String name,
-								  String dimensions,
-								  String weight,
-								  String cOrigin,
-								  double price){
+	public static void addProductCategory(Connection conn,
+								  int p_id,
+								  String name){
 		
 		String query = String.format("INSERT INTO product "
-								   + "VALUES (%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%f\');",
-									 id, name, dimensions, weight, cOrigin, price);
+								   + "VALUES (%d,\'%s\');",
+									 p_id, name);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -64,7 +56,7 @@ public class ProductTable {
 	}
 	
 	
-	public static ResultSet queryProductTable(Connection conn,
+	public static ResultSet queryProductCategoryTable(Connection conn,
 											  ArrayList<String> columns,
 											  ArrayList<String> whereClauses){
 		
@@ -87,7 +79,7 @@ public class ProductTable {
 			}
 		}
 		
-		sb.append("FROM product ");
+		sb.append("FROM productcategory ");
 		
 		if(!whereClauses.isEmpty()){
 			sb.append("WHERE ");
@@ -114,20 +106,16 @@ public class ProductTable {
 	}
 	
 	
-	public static void printProductTable(Connection conn){
-		String query = "SELECT * FROM product;";
+	public static void printProductCategoryTable(Connection conn){
+		String query = "SELECT * FROM productcategory;";
 		try {
 			Statement stmt = conn.createStatement();
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("Product %d: %s %s %s %s %f",
+				System.out.printf("ProductCategory %d: %s",
 								  result.getInt(1),
-								  result.getString(2),
-								  result.getString(3),
-								  result.getString(4),
-								  result.getString(5),
-								  result.getDouble(6));
+								  result.getString(2));
 			}
 			
 		} catch (SQLException e){
