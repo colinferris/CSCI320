@@ -31,8 +31,9 @@ public class UserAccountTable {
 					+ "LAST_NAME VARCHAR (255),"
 					+ "MI CHAR (5),"
 					+ "BIRTHDATE INT,"
-					+ "PASSWORD VARCHAR(255)"
+					+ "PASSWORD VARCHAR(255),"
 					+ "CREDIT NUMERIC (8,2),"
+					+ "PRIMARY KEY(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
