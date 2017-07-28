@@ -3,6 +3,7 @@
  * Represents a credit or debit card
  *
  */
+package com.globalcanal;
 public class PaymentMethod {
 
 	int U_id;

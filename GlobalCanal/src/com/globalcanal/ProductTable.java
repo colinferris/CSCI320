@@ -1,4 +1,9 @@
 
+package com.globalcanal;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -12,22 +17,53 @@ public class ProductTable {
 
 	public static void populateProductTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
 		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
+
+		ArrayList<Product> products = new ArrayList<Product>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				products.add(new Product(
+						Integer.parseInt(split[0]),
+						split[1],
+						split[2],
+						split[3],
+						split[4],
+						Double.valueOf(split[5])
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createProductSQLInsert(products);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+
 		
 	}
 	
 	public static void createProductTable(Connection conn){
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS product("
-					+ "ID INT,"
+					+ "ID INT AUTO_INCREMENT,"
 					+ "NAME VARCHAR (255),"
 					+ "DIMENSIONS VARCHAR (255),"
 					+ "WEIGHT VARCHAR (255),"
@@ -133,6 +169,41 @@ public class ProductTable {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+	}
+
+	public static String createProductSQLInsert(ArrayList<Product> products)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO product (ID, NAME, DIMENSIONS, WEIGHT, C_ORIGIN, PRICE) VALUES");
+
+		/**
+		 * For each person append a (id, first_name, last_name, MI) tuple
+		 *
+		 * If it is not the last person add a comma to seperate
+		 *
+		 * If it is the last person add a semi-colon to end the statement
+		 */
+		for(int i = 0; i < products.size(); i++){
+			Product pr = products.get(i);
+			sb.append(String.format("(%d,\'%s\',\'%s\',\'%s\',\'%s\',%.2f)",
+					pr.getID(), pr.getName(), pr.getDimensions(), pr.getWeight(), pr.getCountry(), pr.getPrice()
+			));
+			if( i != products.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
 	}
 		
 }

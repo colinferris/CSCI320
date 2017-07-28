@@ -4,6 +4,7 @@
  * 
  *
  */
+package com.globalcanal;
 public class PhoneNumber {
 
 	int U_id;

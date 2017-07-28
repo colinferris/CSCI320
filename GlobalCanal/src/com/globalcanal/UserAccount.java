@@ -1,3 +1,4 @@
+package com.globalcanal;
 /**
  * 
  * Holds data about a UserAccount

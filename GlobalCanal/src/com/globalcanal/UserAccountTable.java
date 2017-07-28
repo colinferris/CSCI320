@@ -1,3 +1,8 @@
+package com.globalcanal;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -11,16 +16,47 @@ public class UserAccountTable {
 
 	public static void populateUserAccountTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
 		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
-		
+
+		ArrayList<UserAccount> userAccounts = new ArrayList<UserAccount>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				userAccounts.add(new UserAccount(
+						Integer.parseInt(split[0]),
+						split[1],
+						split[2],
+						split[3],
+						split[5],
+						Integer.parseInt(split[4]),
+						Double.parseDouble(split[6])
+
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createUserAccountSQLInsert(userAccounts);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
 	}
 	
 	public static void createUserAccountTable(Connection conn){
@@ -139,12 +175,40 @@ public class UserAccountTable {
 			e.printStackTrace();
 		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+	public static String createUserAccountSQLInsert(ArrayList<UserAccount> userAccounts)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO shoppingcart (ID, FIRST_NAME, LAST_NAME, MI, BIRTHDATE, PASSWORD, CREDIT) VALUES");
+
+		for(int i = 0; i < userAccounts.size(); i++){
+			UserAccount ua = userAccounts.get(i);
+			sb.append(String.format("(%d,\'%s\',\'%s\',\'%s\',%d,\'%s\',%.2f)",
+					ua.getId(), ua.getFName(), ua.getLName(), ua.getMI(), ua.getBirthdate(), ua.getPassword(), ua.getCredit()
+			));
+			if( i != userAccounts.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
+	}
+
+
+
+
+
+
+
+
 }

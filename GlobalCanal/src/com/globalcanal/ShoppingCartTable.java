@@ -1,4 +1,8 @@
 
+package com.globalcanal;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -14,14 +18,44 @@ public class ShoppingCartTable {
 												   String fileName) throws SQLException{
 		
 		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
-		
+
+		ArrayList<ShoppingCart> shoppingCarts = new ArrayList<ShoppingCart>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				shoppingCarts.add(new ShoppingCart(
+						Integer.parseInt(split[0]),
+						Integer.parseInt(split[1]),
+						Double.parseDouble(split[2])
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createShoppingCartSQLInsert(shoppingCarts);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+
+
+
 	}
 	
 	public static void createShoppingCartTable(Connection conn){
@@ -126,5 +160,34 @@ public class ShoppingCartTable {
 			e.printStackTrace();
 		}
 	}
-		
+
+	public static String createShoppingCartSQLInsert(ArrayList<ShoppingCart> shoppingCarts)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO shoppingcart (U_ID, SC_ID, TOTALCOST) VALUES");
+
+		for(int i = 0; i < shoppingCarts.size(); i++){
+			ShoppingCart sc = shoppingCarts.get(i);
+			sb.append(String.format("(%d,%d,%.2f)",
+					sc.getUID(), sc.getSCID(), sc.totalCost()
+			));
+			if( i != shoppingCarts.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
+	}
+
+
 }

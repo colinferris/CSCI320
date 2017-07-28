@@ -3,6 +3,8 @@
  * 
  *
  */
+package com.globalcanal;
+
 public class OrderedProduct {
 
 	int order_ID;

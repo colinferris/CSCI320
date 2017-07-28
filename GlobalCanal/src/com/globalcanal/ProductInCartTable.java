@@ -1,4 +1,8 @@
+package com.globalcanal;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -12,16 +16,44 @@ public class ProductInCartTable {
 
 	public static void populateProductInCartTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
 		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
-		
+
+		ArrayList<ProductInCart> productInCarts = new ArrayList<ProductInCart>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				productInCarts.add(new ProductInCart(
+						Integer.parseInt(split[0]),
+						Integer.parseInt(split[1])
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createProductInCartSQLInsert(productInCarts);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+
+
+
 	}
 	
 	public static void createProductInCartTable(Connection conn){
@@ -126,6 +158,33 @@ public class ProductInCartTable {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+	}
+	public static String createProductInCartSQLInsert(ArrayList<ProductInCart> productInCarts)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO productincart (P_ID, SC_ID) VALUES");
+
+		for(int i = 0; i < productInCarts.size(); i++){
+			ProductInCart pc = productInCarts.get(i);
+			sb.append(String.format("(%d,%d)",
+					pc.getPID(), pc.getSCID()
+			));
+			if( i != productInCarts.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
 	}
 		
 }

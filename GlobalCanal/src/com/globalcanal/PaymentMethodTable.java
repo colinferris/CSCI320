@@ -1,4 +1,8 @@
 
+package com.globalcanal;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -12,15 +16,47 @@ public class PaymentMethodTable {
 
 	public static void populatePaymentMethodTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
-		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+
+				/*
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
+
+		ArrayList<PaymentMethod> paymentMethods = new ArrayList<PaymentMethod>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				paymentMethods.add(new PaymentMethod(
+						Integer.parseInt(split[0]),
+						Integer.parseInt(split[1]),
+						split[2],
+						Integer.parseInt(split[3]),
+						Integer.parseInt(split[4]),
+						Integer.parseInt(split[5]),
+						Integer.parseInt(split[6])
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createPaymentMethodSQLInsert(paymentMethods);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
 		
 	}
 	
@@ -137,6 +173,57 @@ public class PaymentMethodTable {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+	}
+
+	/*
+		int U_id;
+	int P_id;
+	String cName;
+	int cNum;
+	int expMonth;
+	int expYear;
+	int sCode;
+	 */
+	public static String createPaymentMethodSQLInsert(ArrayList<PaymentMethod> paymentMethods)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO paymentmethod (U_id, P_id, cName, cNum" +
+				"expMonth, expYear, sCode) VALUES");
+
+		/**
+		 * For each person append a (id, first_name, last_name, MI) tuple
+		 *
+		 * If it is not the last person add a comma to seperate
+		 *
+		 * If it is the last person add a semi-colon to end the statement
+		 */
+		for(int i = 0; i < paymentMethods.size(); i++){
+			PaymentMethod pm = paymentMethods.get(i);
+			sb.append(String.format("(%d,%d,\'%s\',%d,%d,%d,%d)",
+					pm.U_id,
+					pm.P_id,
+					pm.cName,
+					pm.cNum,
+					pm.expMonth,
+					pm.expYear,
+					pm.sCode
+			));
+			if( i != paymentMethods.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
 	}
 		
 }
