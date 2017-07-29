@@ -31,3 +31,4 @@ hs_err_pid*
 
 # IntelliJ
 out/
+/global-canal/.idea/workspace.xml
