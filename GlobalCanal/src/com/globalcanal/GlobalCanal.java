@@ -1,3 +1,5 @@
+package com.globalcanal;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,18 +31,18 @@ public class GlobalCanal {
 	 * 
 	 */
 	public static void addProductToCart(int U_id, int SC_id, int P_id){
-		double totalCost;
+		double totalCost = 0.0;
 		String query = String.format("SELECT PRICE FROM PRODUCT WHERE P_ID = %d;", P_id);
 		ResultSet rs;
 		
 		try {
 			Statement stmt = conn.createStatement();
 			rs = stmt.executeQuery(query);
+			totalCost = rs.getDouble(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		totalCost = rs.getDouble(1);
 		
 		ProductInCartTable.addProductInCart(conn, SC_id, P_id, totalCost);
 		updateCartPrice(U_id, SC_id);
@@ -74,7 +76,7 @@ public class GlobalCanal {
 	 */
 	public static void updateCartPrice(int U_id, int SC_id){
 		 
-		double totalPrice = 0;
+		double totalPrice = 0.0;
 		ResultSet rs;
 		ResultSet result2;
 		String query = String.format("SELECT TOTALCOST FROM productincart "
@@ -83,13 +85,14 @@ public class GlobalCanal {
 		try {
 			Statement stmt = conn.createStatement();
 			rs = stmt.executeQuery(query);
+			while(rs.next()){
+				totalPrice += rs.getDouble(1);
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		while(rs.next()){
-			totalPrice += rs.getDouble(1);
-		}
+		
 		
 		query = String.format("UPDATE shopping_cart "
 				            + "SET TOTALCOST = %f "
@@ -119,8 +122,12 @@ public class GlobalCanal {
 	 */
 	public static void makeOrder(int U_id, int SC_id){
 		
-		double credit;
-		double totalCost;
+		double credit = 0.0;
+		double totalCost = 0.0;
+		int Shipment_id = 0;
+		int Payment_id = 0;
+		int order_id = 0;
+		int product_id;
 		ResultSet rs;
 		
 		String query = String.format("SELECT CREDIT FROM useraccount "
@@ -128,11 +135,12 @@ public class GlobalCanal {
 		try {
 			Statement stmt = conn.createStatement();
 			rs = stmt.executeQuery(query);
+			credit = rs.getDouble(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
-		credit = rs.getDouble(1);
+		
 		
 		
 		query = String.format("SELECT TOTALCOST FROM shoppingcart "
@@ -140,12 +148,13 @@ public class GlobalCanal {
 		try {
 			Statement stmt = conn.createStatement();
 			rs = stmt.executeQuery(query);
+			totalCost = rs.getDouble(1);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 				
 				
-		totalCost = rs.getDouble(1);
+		
 		
 		if(totalCost > credit){
 			System.out.println("Insufficent Funds for Purchase.");
@@ -162,11 +171,12 @@ public class GlobalCanal {
 			try {
 				Statement stmt = conn.createStatement();
 				rs = stmt.executeQuery(query);
+				Shipment_id = rs.getInt(1);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			
-			int Shipment_id = rs.getInt(1);
+			
 			
 			//find payment method
 			query = String.format("SELECT P_ID FROM paymentmethod "
@@ -175,11 +185,12 @@ public class GlobalCanal {
 			try {
 				Statement stmt = conn.createStatement();
 				rs = stmt.executeQuery(query);
+				Payment_id = rs.getInt(1);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			
-			int Payment_id = rs.getInt(1);
+			
 			
 			//generate order
 			PreviousOrderTable.addPreviousOrder(conn, rand - 1000000, rand, rand+3, totalCost, Payment_id, Shipment_id, U_id);
@@ -193,11 +204,12 @@ public class GlobalCanal {
 			try {
 				Statement stmt = conn.createStatement();
 				rs = stmt.executeQuery(query);
+				order_id = rs.getInt(1);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			
-			int order_id = rs.getInt(1);
+			
 			
 			//create orderedproducts
 			query = String.format("SELECT P_ID FROM productincart "
@@ -205,17 +217,18 @@ public class GlobalCanal {
 			try {
 				Statement stmt = conn.createStatement();
 				rs = stmt.executeQuery(query);
+				while(rs.next()){
+					product_id = rs.getInt(1);
+					OrderedProductTable.addOrderedProduct(conn, order_id, product_id);
+					removeProductFromCart(U_id, SC_id, product_id);
+				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 			
-			int product_id;
 			
-			while(rs.next()){
-				product_id = rs.getInt(1);
-				OrderedProductTable.addOrderedProduct(conn, order_id, product_id);
-				removeProductFromCart(U_id, SC_id, product_id);
-			}
+			
+			
 			
 			//credit the useraccount 
 			double newcredit = credit - totalCost;
@@ -250,7 +263,7 @@ public class GlobalCanal {
 	 */
 	public static ResultSet searchProductByCategory(String category){
 		
-		ResultSet rs;
+		ResultSet rs = null;
 		
 		String query = String.format("SELECT * FROM PRODUCT "
 				                   + "WHERE P_ID = "
