@@ -1,16 +1,23 @@
 package com.globalcanal;
 
+import javax.jws.soap.SOAPBinding;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class App {
 
     //The connection to the database
     private Connection conn;
+
+    private UserAccount userAccount;
+
 
     /**
      * Create a database connection with the given params
@@ -49,6 +56,136 @@ public class App {
         return conn;
     }
 
+    public UserAccount getUserAccount(){
+        return userAccount;
+    }
+
+    public void createUser(Connection conn){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter User First Name:");
+        String firstName = sc.nextLine();
+        System.out.println("Enter User Last Name:");
+        String lastName = sc.nextLine();
+        System.out.println("Enter a Middle Initial:");
+        String MI = sc.nextLine();
+        System.out.println("Enter User Password:");
+        String password = sc.nextLine();
+        System.out.println("Enter your birthdate (mm/dd/yyyy)");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("mm/dd/yyyy");
+        try{
+            java.util.Date birthdate = dateFormat.parse(sc.nextLine());
+            gc.createUser(conn, firstName, lastName, MI, birthdate, password);
+
+        }
+        catch (ParseException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    public void getUserLogin(Connection conn){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter User First Name:");
+        String firstName = sc.nextLine();
+        System.out.println("Enter User Last Name:");
+        String lastName = sc.nextLine();
+        System.out.println("Enter User Password:");
+        String password = sc.nextLine();
+        try{
+            ResultSet rs = gc.userLogin(conn, firstName, lastName, password);
+
+            if (!rs.next()){
+                System.out.println("No such user");
+            }
+            else {
+                userAccount = new UserAccount(
+                        rs.getInt("ID"),
+                        rs.getString("FIRST_NAME"),
+                        rs.getString("LAST_NAME"),
+                        rs.getString("MI"),
+                        rs.getString("PASSWORD"),
+                        rs.getDate("BIRTHDATE"),
+                        rs.getDouble("CREDIT"));
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("No such user");
+        }
+    }
+
+    public void createPaymentMethod(Connection conn, int u_id){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Card Type:");
+        String cardName = sc.nextLine();
+        System.out.println("Enter Card Number:");
+        long cardNumber = Long.parseLong(sc.nextLine());
+        System.out.println("Enter Expiration Year: (xxxx)");
+        int expirationYear = Integer.parseInt(sc.nextLine());
+        System.out.println("Enter Expiration Month: (xx)");
+        int expirationMonth = Integer.parseInt(sc.nextLine());
+        System.out.println("Enter Security Code: ");
+        int securityCode = Integer.parseInt(sc.nextLine());
+
+        gc.createPaymentMethod(conn, u_id, cardName, cardNumber, expirationYear, expirationMonth, securityCode);
+    }
+    public void listUserInformation(Connection conn, UserAccount user){
+        GlobalCanal gc = new GlobalCanal();
+        gc.listUserInfomation(conn, user);
+
+    }
+
+    public void changeUserName(Connection conn, UserAccount ua){
+        GlobalCanal gc = new GlobalCanal();
+        gc.changeUserName(conn, ua);
+    }
+
+    public void deletePaymentMethod(Connection conn, int UserID){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Payment Method ID to Delete: ");
+        int idToDelete = Integer.parseInt(sc.nextLine());
+
+        gc.deletePaymentMethod(conn, UserID, idToDelete);
+    }
+
+    public void createShippingAddress(Connection conn, UserAccount user){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Street Number:");
+        String streetNumber = sc.nextLine();
+        System.out.println("Enter Street Name:");
+        String streetName = sc.nextLine();
+        System.out.println("Enter Apartment Number");
+        String aptNum = sc.nextLine();
+        System.out.println("Enter City: ");
+        String city = sc.nextLine();
+        System.out.println("Enter State: ");
+        String state = sc.nextLine();
+        System.out.println("Enter Zipcode");
+        int zipcode = Integer.valueOf(sc.nextLine());
+        ShippingAddress newAddress = new ShippingAddress(user.getId(), 0, streetNumber, streetName, aptNum, city, state, zipcode);
+        ShippingAddressTable.addShippingAddress(conn, newAddress);
+    }
+
+    public void listShippingInformation(Connection conn, UserAccount user){
+        GlobalCanal gc = new GlobalCanal();
+        gc.listShippingInformation(conn, user.getId());
+
+    }
+
+    public void deleteShippingAddress(Connection conn, int UserID){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Payment Method ID to Delete: ");
+        int idToDelete = Integer.parseInt(sc.nextLine());
+
+        gc.deleteShipmentMethod(conn, UserID, idToDelete);
+    }
     /**
      * When your database program exits
      * you should close the connection
@@ -63,13 +200,15 @@ public class App {
 
     public static void main( String[] args ) {
         Menu mainMenu = new Menu();
-        GlobalCanal gc = new GlobalCanal();
+        final UserAccount userAccount;
 
-        com.globalcanal.App globalCanal = new com.globalcanal.App();
+        final GlobalCanal gc = new GlobalCanal();
+
+        final App globalCanal = new App();
 
         //Hard drive location of the database
         String location = "~/globalcanal/globalcanal";
-        String user = "scj";
+        final String user = "scj";
         String password = "password";
 
         //Create the database connections, basically makes the database
@@ -161,6 +300,106 @@ public class App {
                         System.out.println("This menu item features a Runnable to define the function this menu item calls");
                     }
         });
+        mainMenu.addMenuItem("2", "Login", new Runnable() {
+            @Override
+            public void run() {
+                globalCanal.getUserLogin(globalCanal.getConnection());
+
+            }
+
+        });
+        mainMenu.addMenuItem("3", "Create User", new Runnable() {
+            @Override
+            public void run() {
+                globalCanal.createUser(globalCanal.getConnection());
+            }
+        });
+        mainMenu.addMenuItem("9", "Update Name", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.changeUserName(conn, ua);
+            }
+        });
+        mainMenu.addMenuItem("U1", "Display User Info", new Runnable() {
+            @Override
+            public void run() {
+                globalCanal.listUserInformation(globalCanal.getConnection(), globalCanal.getUserAccount());
+            }
+        });
+        mainMenu.addMenuItem("4", "Create Payment Method", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                globalCanal.createPaymentMethod(globalCanal.getConnection(), ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("5", "List My Payment Methods:", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                PaymentMethodTable.printPaymentMethodByUID(globalCanal.getConnection(), ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("6", "Delete My Payment Method: ", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                globalCanal.deletePaymentMethod(globalCanal.getConnection(), ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("7", "Add Credit to account:", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                Scanner sc = new Scanner(System.in);
+                System.out.println("Enter Credit to Add: ");
+                double credit = Double.parseDouble(sc.nextLine());
+                gc.addCredit(conn, ua, credit);
+            }
+        });
+        mainMenu.addMenuItem("8", "Display account information: ", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                System.out.printf("UserAccount %d: %s %s %s %tF %s %f\n",
+                        ua.getId(),
+                        ua.getFName(),
+                        ua.getLName(),
+                        ua.getMI(),
+                        ua.getBirthdate(),
+                        ua.getPassword(),
+                        ua.getCredit());
+            }
+        });
+        mainMenu.addMenuItem("SH1", "Add Shipping Address", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.createShippingAddress(conn, ua);
+            }
+        });
+
+        mainMenu.addMenuItem("SH2", "List Shipping Address", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.listShippingInformation(conn, ua);
+            }
+        });
+        mainMenu.addMenuItem("SH3", "Delete My Shipping Address: ", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                globalCanal.deleteShippingAddress(globalCanal.getConnection(), ua.getId());
+            }
+        });
+
+
 
         mainMenu.start();
     }

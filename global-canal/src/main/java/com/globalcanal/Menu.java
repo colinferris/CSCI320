@@ -84,6 +84,7 @@ public class Menu {
                     try {
                         runCommand(option);
                     } catch (Exception ex) {
+                        ex.printStackTrace();
                         System.out.println("An error has occured: " + ex.getMessage());
                     }
 

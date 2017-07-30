@@ -65,7 +65,7 @@ public class ShippingAddressTable {
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS shippingaddress("
 					+ "U_ID INT,"
-					+ "S_ID INT,"
+					+ "S_ID INT AUTO_INCREMENT,"
 					+ "STREETNUM VARCHAR (255),"
 					+ "STREETNAME VARCHAR (255),"
 					+ "APTNUM VARCHAR (255),"
@@ -83,20 +83,12 @@ public class ShippingAddressTable {
 		}
 	}
 	
-	public static void addShippingAddress(Connection conn,
-								  int U_id,
-								  int S_id,
-								  String streetNum,
-								  String streetName,
-								  String aptNum,
-								  String city,
-								  String state,
-								  int zipCode){
-		
-		String query = String.format("INSERT INTO shippingaddress "
-								   + "VALUES (%d,\'%d\',\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',\'%d\');",
-									 U_id, S_id, streetNum, streetName, aptNum, city, state, zipCode);
+	public static void addShippingAddress(Connection conn, ShippingAddress address){
+		String query = String.format("INSERT INTO shippingaddress (U_ID, STREETNUM, STREETNAME, APTNUM, CITY, STATE, ZIPCODE) "
+								   + "VALUES (%d,\'%s\',\'%s\',\'%s\',\'%s\',\'%s\',%d);",
+									 address.getUID(), address.getStreetNum(), address.getStreetName(), address.getAptNum(), address.getCity(), address.getState(), address.getZip());
 		try {
+			System.out.println(query);
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
 		} catch (SQLException e) {

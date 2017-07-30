@@ -62,7 +62,7 @@ public class PaymentMethodTable {
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS paymentmethod("
 					+ "U_ID INT,"
-					+ "P_ID INT,"
+					+ "P_ID INT AUTO_INCREMENT,"
 					+ "CNAME VARCHAR (255),"
 					+ "CNUM VARCHAR (255),"
 					+ "EXPYEAR INT,"
@@ -81,16 +81,15 @@ public class PaymentMethodTable {
 	
 	public static void addPaymentMethod(Connection conn,
 								  int U_id,
-								  int p_id,
 								  String cName,
-								  int cNum,
+								  long cNum,
 								  int expYear,
 								  int expMonth,
 								  int sCode){
-		
-		String query = String.format("INSERT INTO paymentmethod "
-								   + "VALUES (%d,\'%d\',\'%s\',\'%d\',\'%d\',\'%d\',\'%d\');",
-									 U_id, p_id, cName, cNum, expYear, expMonth, sCode);
+
+		String query = String.format("INSERT INTO paymentmethod (U_ID, CNAME, CNUM, EXPYEAR, EXPMONTH, SCODE) "
+						+ "VALUES (%d,\'%s\',%d,%d,%d,%d);",
+				U_id, cName, cNum, expYear, expMonth, sCode);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -158,8 +157,7 @@ public class PaymentMethodTable {
 			ResultSet result = stmt.executeQuery(query);
 			
 			while(result.next()){
-				System.out.printf("PaymentMethod %d %d: %s %d %d %d %d\n",
-								  result.getInt(1),
+				System.out.printf("PaymentMethod %d: %s %d %d %d %d\n",
 								  result.getInt(2),
 								  result.getString(3),
 								  result.getString(4),
@@ -173,15 +171,29 @@ public class PaymentMethodTable {
 		}
 	}
 
-	/*
-		int U_id;
-	int P_id;
-	String cName;
-	int cNum;
-	int expMonth;
-	int expYear;
-	int sCode;
-	 */
+	public static void printPaymentMethodByUID(Connection conn, int UID){
+		String query = String.format("SELECT * FROM paymentmethod WHERE U_ID = %d;", UID);
+		try {
+			Statement stmt = conn.createStatement();
+			ResultSet result = stmt.executeQuery(query);
+
+			while(result.next()){
+				System.out.printf("PaymentMethod %d: %s %s %d %d %d\n",
+						result.getInt(2),
+						result.getString(3),
+						result.getString(4),
+						result.getInt(5),
+						result.getInt(6),
+						result.getInt(7));
+			}
+
+		} catch (SQLException e){
+			e.printStackTrace();
+		}
+	}
+
+
+
 	public static String createPaymentMethodSQLInsert(ArrayList<PaymentMethod> paymentMethods)
 	{
 		StringBuilder sb = new StringBuilder();

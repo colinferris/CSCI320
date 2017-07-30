@@ -1,8 +1,10 @@
 package com.globalcanal;
 
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Scanner;
 
 
 /**
@@ -271,6 +273,8 @@ public class GlobalCanal {
      *
      ************************************/
 
+
+
     /************************************
      *
      * ITEM SEARCH
@@ -290,7 +294,7 @@ public class GlobalCanal {
 
         ResultSet rs = null;
 
-        String query = String.format("SELECT * FROM PRODUCT "
+        String query = String.format("SELECT * FROM product "
                 + "WHERE P_ID = "
                 + "(SELECT P_ID FROM productcategory"
                 + "WHERE NAME = %"
@@ -306,6 +310,138 @@ public class GlobalCanal {
 
         return rs;
     }
+
+    /************************************
+     *
+     * User Functionality
+     *
+     ************************************/
+    public static ResultSet userLogin(Connection conn, String firstName, String lastName, String password) {
+        ResultSet rs = null;
+        String query = String.format("SELECT * FROM useraccount " +
+                "WHERE FIRST_NAME = \'%s\' AND LAST_NAME = \'%s\' AND PASSWORD = \'%s\';",
+                firstName, lastName, password);
+        try {
+            Statement stmt = conn.createStatement();
+            rs = stmt.executeQuery(query);
+            System.out.println("Query Worked");
+        }
+        catch(SQLException e) {
+            e.printStackTrace();
+        }
+
+        return rs;
+
+    }
+
+    public static void createUser(Connection conn, String firstName, String lastName, String mI, java.util.Date birthdate, String password){
+        UserAccountTable.addUserAccount(conn, firstName, lastName, mI, birthdate, password, 10000.00);
+        UserAccountTable.printUserAccountTable(conn);
+    }
+
+    public static void addCredit(Connection conn, UserAccount account, double creditToAdd){
+        String query = String.format("UPDATE useraccount SET CREDIT = %.2f WHERE ID = %d;", account.getCredit() + creditToAdd, account.getId());
+        try{
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        account.setCredit(account.getCredit() + creditToAdd);
+    }
+
+    public static void listUserInfomation(Connection conn, UserAccount account){
+        String query = String.format("SELECT * from useraccount WHERE ID = %d;", account.getId());
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet result = stmt.executeQuery(query);
+
+            while(result.next()){
+                System.out.printf("UserAccount %d: %s %s %s %tF %s %f\n",
+                        result.getInt(1),
+                        result.getString(2),
+                        result.getString(3),
+                        result.getString(4),
+                        result.getDate(5),
+                        result.getString(6),
+                        result.getDouble(7));
+            }
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    /************************************
+     *
+     * Payment Method Functionality
+     *
+     ************************************/
+
+    public static void createPaymentMethod(Connection conn, int U_ID, String cName, long cNum, int expYear, int expMonth, int sCode){
+        PaymentMethodTable.addPaymentMethod(conn, U_ID, cName, cNum, expYear, expMonth, sCode);
+    }
+
+    public static void changeUserName(Connection conn, UserAccount user){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter User First Name:");
+        String firstName = sc.nextLine();
+        System.out.println("Enter User Last Name:");
+        String lastName = sc.nextLine();
+        System.out.println("Enter User Middle Initial:");
+        String middleInitial = sc.nextLine();
+        user.setFName(!firstName.isEmpty() ? firstName : user.getFName());
+        user.setLName(!lastName.isEmpty() ? lastName : user.getLName());
+        user.setMI(!middleInitial.isEmpty() ? middleInitial : user.getMI());
+
+        UserAccountTable.updateUserName(conn, user);
+    }
+
+    public static void deletePaymentMethod(Connection conn, int userID, int pMethodID){
+        String query = String.format("DELETE FROM paymentmethod WHERE U_ID = %d AND P_ID = %d;", userID, pMethodID);
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void listShippingInformation(Connection conn, int userID){
+        String query = String.format("SELECT * FROM shippingaddress WHERE U_ID = %d;", userID);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet result = stmt.executeQuery(query);
+
+            while(result.next()){
+                System.out.printf("Shipping Address %d: %s %s %s %s %s %d\n",
+                        result.getInt(2),
+                        result.getString(3),
+                        result.getString(4),
+                        result.getString(5),
+                        result.getString(6),
+                        result.getString(7),
+                        result.getInt(8));
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteShipmentMethod(Connection conn, int userID, int sAddressID){
+        String query = String.format("DELETE FROM shippingaddress WHERE U_ID = %d AND S_ID = %d;", userID, sAddressID);
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+
 
 
 

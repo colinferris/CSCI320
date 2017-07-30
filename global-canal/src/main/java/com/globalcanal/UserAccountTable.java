@@ -70,7 +70,7 @@ public class UserAccountTable {
 	public static void createUserAccountTable(Connection conn){
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS useraccount("
-					+ "ID INT,"
+					+ "ID INT AUTO_INCREMENT,"
 					+ "FIRST_NAME VARCHAR (255),"
 					+ "LAST_NAME VARCHAR (255),"
 					+ "MI CHAR (5),"
@@ -88,17 +88,16 @@ public class UserAccountTable {
 	}
 	
 	public static void addUserAccount(Connection conn,
-								  int id,
 								  String fName,
 								  String lName,
 								  String MI,
-								  Date birthdate,
+								  java.util.Date birthdate,
 								  String password,
 								  double credit){
 		
-		String query = String.format("INSERT INTO useraccount "
-								   + "VALUES (%d,\'%s\',\'%s\',\'%s\',\'%tF\',\'%s\',\'%f\');",
-									 id, fName, lName, MI, birthdate, password, credit);
+		String query = String.format("INSERT INTO useraccount (FIRST_NAME, LAST_NAME, MI, BIRTHDATE, PASSWORD, CREDIT) "
+								   + "VALUES (\'%s\',\'%s\',\'%s\',\'%tF\',\'%s\',\'%.2f\');",
+									 fName, lName, MI, birthdate, password, credit);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
@@ -180,6 +179,18 @@ public class UserAccountTable {
 			}
 			
 		} catch (SQLException e){
+			e.printStackTrace();
+		}
+	}
+
+	public static void updateUserName(Connection conn, UserAccount user){
+		String query = String.format("UPDATE useraccount SET FIRST_NAME = \'%s\', LAST_NAME = \'%s\', MI = \'%s\';",
+				user.getFName(), user.getLName(), user.getMI());
+		try{
+			System.out.println(query);
+			Statement stmt = conn.createStatement();
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}

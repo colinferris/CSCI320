@@ -47,13 +47,25 @@ public class UserAccount {
 	public String getFName(){
 		return fName;
 	}
+
+	public void setFName(String firstName){
+		this.fName = firstName;
+	}
 	
 	public String getLName(){
 		return lName;
 	}
+
+	public void setLName(String lastName){
+		this.lName = lastName;
+	}
 	
 	public String getMI(){
 		return mI;
+	}
+
+	public void setMI(String MI){
+		this.mI = MI;
 	}
 	
 	public String getPassword(){
@@ -67,5 +79,7 @@ public class UserAccount {
 	public double getCredit(){
 		return credit;
 	}
+
+	public void setCredit(double newCredit) {this.credit = newCredit;}
 	
 }
