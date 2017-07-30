@@ -73,7 +73,7 @@ public class ShippingAddressTable {
 					+ "STATE VARCHAR(255),"
 					+ "ZIPCODE INT,"
 					+ "PRIMARY KEY (U_ID, S_ID),"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();

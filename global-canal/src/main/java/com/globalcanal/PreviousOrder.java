@@ -1,5 +1,6 @@
 package com.globalcanal;
 
+import java.util.Date;
 
 /**
  * 
@@ -10,16 +11,16 @@ package com.globalcanal;
 public class PreviousOrder {
 
 	int id;
-	int dateOfPurchase; //YYYYMMDD
-	int dateOfShipment; //^^
+	Date dateOfPurchase; //YYYYMMDD
+	Date dateOfShipment; //^^
 	double totalCost;
 	int p_ID;
 	int s_ID;
 	int u_ID;
 	
 	public PreviousOrder(int id,
-						 int dateOfPurchase,
-						 int dateOfShipment,
+						 Date dateOfPurchase,
+						 Date dateOfShipment,
 						 double totalCost,
 						 int payment_ID,
 						 int shipping_ID,
@@ -38,11 +39,11 @@ public class PreviousOrder {
 		return id;
 	}
 	
-	public int getPurchaseDate(){
+	public Date getPurchaseDate(){
 		return dateOfPurchase;
 	}
 	
-	public int getShipmentDate(){
+	public Date getShipmentDate(){
 		return dateOfShipment;
 	}
 	

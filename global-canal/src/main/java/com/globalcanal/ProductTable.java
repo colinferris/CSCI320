@@ -27,6 +27,7 @@ public class ProductTable {
 			String line;
 			while((line = br.readLine()) != null){
 				String[] split = line.split(",");
+				System.out.println(split[0]);
 				products.add(new Product(
 						Integer.parseInt(split[0]),
 						split[1],

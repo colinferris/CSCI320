@@ -63,7 +63,7 @@ public class ProductInCartTable {
 					+ "P_ID INT,"
 					+ "TOTALCOST NUMERIC(8,2),"
 					+ "FOREIGN KEY (SC_ID) REFERENCES shoppingcart(SC_ID),"
-					+ "FOREIGN KEY (P_ID) REFERENCES product(P_ID),"
+					+ "FOREIGN KEY (P_ID) REFERENCES product(ID),"
 					+ "PRIMARY KEY (SC_ID, P_ID)"
 					+ ");";
 			

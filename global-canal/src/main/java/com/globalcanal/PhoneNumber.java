@@ -9,10 +9,10 @@ package com.globalcanal;
 public class PhoneNumber {
 
 	int U_id;
-	int pNumber;
+	String pNumber;
 	
 	public PhoneNumber(int U_id,
-					   int pNumber){
+					   String pNumber){
 		this.pNumber = pNumber;
 		this.U_id = U_id;
 	}
@@ -21,7 +21,7 @@ public class PhoneNumber {
 		return U_id;
 	}
 	
-	public int getPNumber(){
+	public String getPNumber(){
 		return pNumber;
 	}
 }

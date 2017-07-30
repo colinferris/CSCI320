@@ -64,7 +64,7 @@ public class ProductCategoryTable {
 					+ "P_ID INT,"
 					+ "NAME VARCHAR (255),"
 					+ "PRIMARY KEY (P_ID, NAME),"
-					+ "FOREIGN KEY (P_ID) REFERENCES product(P_ID)"
+					+ "FOREIGN KEY (P_ID) REFERENCES product(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();

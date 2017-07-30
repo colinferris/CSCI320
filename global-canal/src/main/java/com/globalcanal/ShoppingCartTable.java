@@ -62,10 +62,10 @@ public class ShoppingCartTable {
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS shoppingcart("
 					+ "U_ID INT,"
-					+ "SC_ID INT,"
+					+ "SC_ID INT AUTO_INCREMENT,"
 					+ "TOTALCOST NUMERIC (8,2),"
-					+ "PRIMARY KEY (U_ID, SC_ID)"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "PRIMARY KEY (U_ID, SC_ID),"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();

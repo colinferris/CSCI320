@@ -30,9 +30,9 @@ public class PaymentMethodTable {
 						Integer.parseInt(split[0]),
 						Integer.parseInt(split[1]),
 						split[2],
-						Integer.parseInt(split[3]),
-						Integer.parseInt(split[4]),
+						split[3],
 						Integer.parseInt(split[5]),
+						Integer.parseInt(split[4]),
 						Integer.parseInt(split[6])
 				));
 			}
@@ -64,12 +64,12 @@ public class PaymentMethodTable {
 					+ "U_ID INT,"
 					+ "P_ID INT,"
 					+ "CNAME VARCHAR (255),"
-					+ "CNUM INT,"
+					+ "CNUM VARCHAR (255),"
 					+ "EXPYEAR INT,"
 					+ "EXPMONTH INT,"
-					+ "SCODE INT"
-					+ "PRIMARY KEY (U_ID, P_ID)"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "SCODE INT,"
+					+ "PRIMARY KEY (U_ID, P_ID),"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -162,7 +162,7 @@ public class PaymentMethodTable {
 								  result.getInt(1),
 								  result.getInt(2),
 								  result.getString(3),
-								  result.getInt(4),
+								  result.getString(4),
 								  result.getInt(5),
 								  result.getInt(6),
 								  result.getInt(7));
@@ -192,8 +192,8 @@ public class PaymentMethodTable {
 		 * the order of the data in reference
 		 * to the columns to ad dit to
 		 */
-		sb.append("INSERT INTO paymentmethod (U_id, P_id, cName, cNum" +
-				"expMonth, expYear, sCode) VALUES");
+		sb.append("INSERT INTO paymentmethod (U_ID, P_ID, CNAME, CNUM, " +
+				"EXPMONTH, EXPYEAR, SCODE) VALUES");
 
 		/**
 		 * For each person append a (id, first_name, last_name, MI) tuple
@@ -204,14 +204,14 @@ public class PaymentMethodTable {
 		 */
 		for(int i = 0; i < paymentMethods.size(); i++){
 			PaymentMethod pm = paymentMethods.get(i);
-			sb.append(String.format("(%d,%d,\'%s\',%d,%d,%d,%d)",
-					pm.U_id,
-					pm.P_id,
-					pm.cName,
-					pm.cNum,
-					pm.expMonth,
-					pm.expYear,
-					pm.sCode
+			sb.append(String.format("(%d,%d,\'%s\',\'%s\',%d,%d,%d)",
+					pm.getUID(),
+					pm.getPID(),
+					pm.getCName(),
+					pm.getCNum(),
+					pm.getExpMonth(),
+					pm.getExpYear(),
+					pm.getSCode()
 			));
 			if( i != paymentMethods.size()-1){
 				sb.append(",");

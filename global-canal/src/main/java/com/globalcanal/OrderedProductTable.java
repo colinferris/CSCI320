@@ -59,8 +59,8 @@ public class OrderedProductTable {
 					+ "ORDER_ID INT,"
 					+ "PRODUCT_ID INT,"
 					+ "PRIMARY KEY (ORDER_ID, PRODUCT_ID),"
-					+ "FOREIGN KEY (ORDER_ID) REFERENCES previousorder(ORDER_ID),"
-					+ "FOREIGN KEY (PRODUCT_ID) REFERENCES product(PRODUCT_ID),"
+					+ "FOREIGN KEY (ORDER_ID) REFERENCES previousorder(ID),"
+					+ "FOREIGN KEY (PRODUCT_ID) REFERENCES product(ID),"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();

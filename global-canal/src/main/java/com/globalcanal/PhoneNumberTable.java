@@ -29,7 +29,7 @@ public class PhoneNumberTable {
 				String[] split = line.split(",");
 				phoneNumbers.add(new PhoneNumber(
 						Integer.parseInt(split[0]),
-						Integer.parseInt(split[1])
+						split[1]
 				));
 			}
 			br.close();
@@ -60,9 +60,9 @@ public class PhoneNumberTable {
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS phonenumber("
 					+ "U_ID INT,"
-					+ "PNUMBER int,"
+					+ "PNUMBER VARCHAR (255),"
 					+ "PRIMARY KEY (U_ID, PNUMBER),"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -177,7 +177,7 @@ public class PhoneNumberTable {
 		 */
 		for(int i = 0; i < phoneNumbers.size(); i++){
 			PhoneNumber pn = phoneNumbers.get(i);
-			sb.append(String.format("(%d,%d)",
+			sb.append(String.format("(%d,\'%s\')",
 					pn.getUID(),
 					pn.getPNumber()
 			));
