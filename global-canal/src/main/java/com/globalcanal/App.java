@@ -44,17 +44,23 @@ public class App {
         while (choice != 4);
     }
 
-    public static void login(){
-        System.out.println("Authentication is required.");
-        System.out.println("Enter Username:");
-        String username = scan.nextLine();
-        System.out.println("Enter Password:");
-        String password = scan.nextLine();
+    public static void login() {
+        boolean success;
+        do {
+            System.out.println("\nAuthentication is required.\n");
+            System.out.println("Enter Username:");
+            String username = scan.nextLine();
+            System.out.println("Enter Password:");
+            String password = scan.nextLine();
 
-        createConnection(location, username, password);
+            success = createConnection(location, username, password);
+            if (!success) {
+                System.out.println("\nPlease try again.\n");
+            }
+        } while (success != true);
     }
 
-    public static void createConnection(String location,
+    public static boolean createConnection(String location,
                                  String user,
                                  String password){
         try {
@@ -70,11 +76,11 @@ public class App {
                     user,
                     password);
         } catch (SQLException e) {
-            //You should handle this better
-            e.printStackTrace();
+            return false;
         } catch (ClassNotFoundException e){
-            e.printStackTrace();
+           return false;
         }
+        return true;
     }
 
     /**
