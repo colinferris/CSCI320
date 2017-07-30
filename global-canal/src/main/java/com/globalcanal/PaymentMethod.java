@@ -10,7 +10,7 @@ public class PaymentMethod {
 	int U_id;
 	int P_id;
 	String cName;
-	int cNum;
+	String cNum;
 	int expMonth;
 	int expYear;
 	int sCode; //security code
@@ -18,7 +18,7 @@ public class PaymentMethod {
 	public PaymentMethod(int U_id,
 						 int P_id,
 						 String cName,
-						 int cNum,
+						 String cNum,
 						 int expMonth,
 						 int expYear,
 						 int sCode){
@@ -44,7 +44,7 @@ public class PaymentMethod {
 		return cName;
 	}
 	
-	public int getCNum(){
+	public String getCNum(){
 		return cNum;
 	}
 	

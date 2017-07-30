@@ -1,5 +1,7 @@
 package com.globalcanal;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -12,15 +14,47 @@ public class PaymentMethodTable {
 
 	public static void populatePaymentMethodTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
-		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+
+				/*
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
+
+		ArrayList<PaymentMethod> paymentMethods = new ArrayList<PaymentMethod>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				paymentMethods.add(new PaymentMethod(
+						Integer.parseInt(split[0]),
+						Integer.parseInt(split[1]),
+						split[2],
+						split[3],
+						Integer.parseInt(split[5]),
+						Integer.parseInt(split[4]),
+						Integer.parseInt(split[6])
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createPaymentMethodSQLInsert(paymentMethods);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
 		
 	}
 	
@@ -30,12 +64,12 @@ public class PaymentMethodTable {
 					+ "U_ID INT,"
 					+ "P_ID INT,"
 					+ "CNAME VARCHAR (255),"
-					+ "CNUM INT,"
+					+ "CNUM VARCHAR (255),"
 					+ "EXPYEAR INT,"
 					+ "EXPMONTH INT,"
-					+ "SCODE INT"
-					+ "PRIMARY KEY (U_ID, P_ID)"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "SCODE INT,"
+					+ "PRIMARY KEY (U_ID, P_ID),"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -128,7 +162,7 @@ public class PaymentMethodTable {
 								  result.getInt(1),
 								  result.getInt(2),
 								  result.getString(3),
-								  result.getInt(4),
+								  result.getString(4),
 								  result.getInt(5),
 								  result.getInt(6),
 								  result.getInt(7));
@@ -137,6 +171,57 @@ public class PaymentMethodTable {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+	}
+
+	/*
+		int U_id;
+	int P_id;
+	String cName;
+	int cNum;
+	int expMonth;
+	int expYear;
+	int sCode;
+	 */
+	public static String createPaymentMethodSQLInsert(ArrayList<PaymentMethod> paymentMethods)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO paymentmethod (U_ID, P_ID, CNAME, CNUM, " +
+				"EXPMONTH, EXPYEAR, SCODE) VALUES");
+
+		/**
+		 * For each person append a (id, first_name, last_name, MI) tuple
+		 *
+		 * If it is not the last person add a comma to seperate
+		 *
+		 * If it is the last person add a semi-colon to end the statement
+		 */
+		for(int i = 0; i < paymentMethods.size(); i++){
+			PaymentMethod pm = paymentMethods.get(i);
+			sb.append(String.format("(%d,%d,\'%s\',\'%s\',%d,%d,%d)",
+					pm.getUID(),
+					pm.getPID(),
+					pm.getCName(),
+					pm.getCNum(),
+					pm.getExpMonth(),
+					pm.getExpYear(),
+					pm.getSCode()
+			));
+			if( i != paymentMethods.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
 	}
 		
 }

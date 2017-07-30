@@ -1,5 +1,7 @@
 package com.globalcanal;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -13,25 +15,54 @@ public class PhoneNumberTable {
 
 	public static void populatePhoneNumberTableFromCSV(Connection conn,
 												   String fileName) throws SQLException{
-		
+
 		/*
-		 * 
-		 * Fill this out when a CSV format is known
-		 * 
-		 * 
-		 * 
+		 * Similar to the demo, creates a list of ordered product and sends it
+		 * to a helper function to build the bulk insert.
 		 */
-		
-		
+
+		ArrayList<PhoneNumber> phoneNumbers = new ArrayList<PhoneNumber>();
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String line;
+			while((line = br.readLine()) != null){
+				String[] split = line.split(",");
+				phoneNumbers.add(new PhoneNumber(
+						Integer.parseInt(split[0]),
+						split[1]
+				));
+			}
+			br.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		/**
+		 * Creates the SQL query to do a bulk add of all people
+		 * that were read in. This is more efficent then adding one
+		 * at a time
+		 */
+		String sql = createPhoneNumberSQLInsert(phoneNumbers);
+
+		/**
+		 * Create and execute an SQL statement
+		 *
+		 * execute only returns if it was successful
+		 */
+		Statement stmt = conn.createStatement();
+		stmt.execute(sql);
+
+
+
 	}
 	
 	public static void createPhoneNumberTable(Connection conn){
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS phonenumber("
 					+ "U_ID INT,"
-					+ "PNUMBER int,"
+					+ "PNUMBER VARCHAR (255),"
 					+ "PRIMARY KEY (U_ID, PNUMBER),"
-					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(U_ID)"
+					+ "FOREIGN KEY (U_ID) REFERENCES useraccount(ID)"
 					+ ");";
 			
 			Statement stmt = conn.createStatement();
@@ -123,6 +154,42 @@ public class PhoneNumberTable {
 		} catch (SQLException e){
 			e.printStackTrace();
 		}
+	}
+
+	public static String createPhoneNumberSQLInsert(ArrayList<PhoneNumber> phoneNumbers)
+	{
+		StringBuilder sb = new StringBuilder();
+
+		/**
+		 * The start of the statement,
+		 * tells it the table to add it to
+		 * the order of the data in reference
+		 * to the columns to ad dit to
+		 */
+		sb.append("INSERT INTO phonenumber (U_ID, PNUMBER) VALUES");
+
+		/**
+		 * For each person append a (id, first_name, last_name, MI) tuple
+		 *
+		 * If it is not the last person add a comma to seperate
+		 *
+		 * If it is the last person add a semi-colon to end the statement
+		 */
+		for(int i = 0; i < phoneNumbers.size(); i++){
+			PhoneNumber pn = phoneNumbers.get(i);
+			sb.append(String.format("(%d,\'%s\')",
+					pn.getUID(),
+					pn.getPNumber()
+			));
+			if( i != phoneNumbers.size()-1){
+				sb.append(",");
+			}
+			else{
+				sb.append(";");
+			}
+		}
+
+		return sb.toString();
 	}
 		
 }

@@ -1,5 +1,7 @@
 package com.globalcanal;
 
+import java.util.Date;
+
 /**
  * 
  * Holds data about a UserAccount
@@ -14,7 +16,7 @@ public class UserAccount {
 	String pWord;
 	
 	int id;
-	int birthdate; //represent as YYYYMMDD
+	Date birthdate; //represent as YYYYMMDD
 	double credit;
 	
 	
@@ -26,7 +28,7 @@ public class UserAccount {
 						String lName,
 						String mI,
 						String pWord,
-						int birthdate,
+						Date birthdate,
 						double credit){
 		
 		this.fName = fName;
@@ -58,7 +60,7 @@ public class UserAccount {
 		return pWord;
 	}
 	
-	public int getBirthdate(){
+	public Date getBirthdate(){
 		return birthdate;
 	}
 	
