@@ -186,6 +186,29 @@ public class App {
 
         gc.deleteShipmentMethod(conn, UserID, idToDelete);
     }
+
+    public void createPhoneNumber(Connection conn, UserAccount ua){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Phone Number:");
+        String phoneNumber = sc.nextLine();
+        System.out.println(phoneNumber);
+        PhoneNumberTable.addPhoneNumber(conn, ua.getId(), phoneNumber);
+    }
+
+    public void listPhoneNumber(Connection conn, UserAccount user){
+        GlobalCanal gc = new GlobalCanal();
+        gc.listPhoneNumber(conn, user.getId());
+    }
+
+    public void deletePhoneNumber(Connection conn, int UserID){
+        GlobalCanal gc = new GlobalCanal();
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Enter Phone Number to Delete: ");
+        String numberToDelete = sc.nextLine();
+
+        gc.deletePhoneNumber(conn, UserID, numberToDelete);
+    }
     /**
      * When your database program exits
      * you should close the connection
@@ -396,6 +419,30 @@ public class App {
             public void run() {
                 UserAccount ua = globalCanal.getUserAccount();
                 globalCanal.deleteShippingAddress(globalCanal.getConnection(), ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("PN1", "Add A Phone Number", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.createPhoneNumber(conn, ua);
+            }
+        });
+        mainMenu.addMenuItem("PN2", "List Phone Number", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.listPhoneNumber(conn, ua);
+            }
+        });
+        mainMenu.addMenuItem("PN3", "Delete Phone Number", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                globalCanal.deletePhoneNumber(conn, ua.getId());
             }
         });
 

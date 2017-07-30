@@ -74,12 +74,11 @@ public class PhoneNumberTable {
 	
 	public static void addPhoneNumber(Connection conn,
 								  int id,
-								  int pNumber){
+								  String pNumber){
 		
-		String query = String.format("INSERT INTO phonenumber "
-								   + "VALUES (%d,\'%d\');",
-									 id, pNumber);
+		String query = String.format("INSERT INTO phonenumber (U_ID, PNUMBER) VALUES (%d,\'%s\');", id, pNumber);
 		try {
+			System.out.println(query);
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);
 		} catch (SQLException e) {

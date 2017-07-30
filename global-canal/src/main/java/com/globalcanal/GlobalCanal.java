@@ -441,6 +441,32 @@ public class GlobalCanal {
         }
     }
 
+    public static void listPhoneNumber(Connection conn, int userID){
+        String query = String.format("SELECT * FROM phonenumber WHERE U_ID = %d;", userID);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet result = stmt.executeQuery(query);
+
+            while(result.next()){
+                System.out.printf("Shipping Address %d: %s\n",
+                        result.getInt(1),
+                        result.getString(2));
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void deletePhoneNumber(Connection conn, int userID, String pNumber){
+        String query = String.format("DELETE FROM phonenumber WHERE U_ID = %d AND PNUMBER = \'%s\';", userID, pNumber);
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
 
 
 
