@@ -6,12 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
+
+public class App {
+
     //The connection to the database
     private Connection conn;
 
@@ -63,9 +60,12 @@ public class App
             e.printStackTrace();
         }
     }
-    public static void main(String[] args) {
 
-        App globalCanal = new App();
+    public static void main( String[] args ) {
+        Menu mainMenu = new Menu();
+        GlobalCanal gc = new GlobalCanal();
+
+        com.globalcanal.App globalCanal = new com.globalcanal.App();
 
         //Hard drive location of the database
         String location = "~/globalcanal/globalcanal";
@@ -79,7 +79,7 @@ public class App
         try {
 
             /**
-             * Creates a sample UserAccount table 
+             * Creates a sample UserAccount table
              * and populates it from a csv file
              */
             UserAccountTable.createUserAccountTable(globalCanal.getConnection());
@@ -150,82 +150,19 @@ public class App
             UserAccountTable.printUserAccountTable(globalCanal.getConnection());
             ProductTable.printProductTable(globalCanal.getConnection());
 
-            /**
-             * Runs a basic query on the table
-             */
-            System.out.println("\n\nPrint results of SELECT * FROM person");
-            ResultSet results = UserAccountTable.queryUserAccountTable(
-                    globalCanal.getConnection(),
-                    new ArrayList<String>(),
-                    new ArrayList<String>());
-
-            /**
-             * Iterates the Result set
-             *
-             * Result Set is what a query in H2 returns
-             *
-             * Note the columns are not 0 indexed
-             * If you give no columns it will return them in the
-             * order you created them. To gaurantee order list the columns
-             * you want
-             */
-            while(results.next()){
-                System.out.printf("\tUserAccount %d: %s %s %s\n",
-                        results.getInt(1),
-                        results.getString(2),
-                        results.getString(4),
-                        results.getString(3));
-            }
-
-            /**
-             * A more complex query with columns selected and 
-             * addition conditions
-             */
-            System.out.println("\n\nPrint results of SELECT "
-                    + "id, first_name "
-                    + "FROM person "
-                    + "WHERE first_name = \'Scott\' "
-                    + "AND last_name = \'Johnson\'");
-
-            /**
-             * This is one way to do this, but not the only
-             *
-             * Create lists to make the whole thing more generic or
-             * you can just construct the whole query here 
-             */
-            ArrayList<String> columns = new ArrayList<String>();
-            columns.add("id");
-            columns.add("first_name");
-            columns.add("last_name");
-
-            /**
-             * Conditionals
-             */
-            ArrayList<String> whereClauses = new ArrayList<String>();
-            whereClauses.add("first_name = \'Scott\'");
-            whereClauses.add("last_name = \'Johnson\'");
-
-            /**
-             * query and get the result set
-             *
-             * parse the result set and print it
-             *
-             * Notice not all of the columns are here because
-             * we limited what to show in the query
-             */
-            ResultSet results2 = UserAccountTable.queryUserAccountTable(
-                    globalCanal.getConnection(),
-                    columns,
-                    whereClauses);
-            while(results2.next()){
-                System.out.printf("\tUserAccount %d: %s %s\n",
-                        results2.getInt(1),
-                        results2.getString(2),
-                        results2.getString(3));
-            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Data already added");
         }
+
+        mainMenu.addMenuItem("1", "Product Search", new Runnable() {
+                    @Override
+                    public void run(){
+                        System.out.println("This is the second menu item");
+                        System.out.println("This menu item features a Runnable to define the function this menu item calls");
+                    }
+        });
+
+        mainMenu.start();
     }
 
 }

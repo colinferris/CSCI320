@@ -33,7 +33,6 @@ public class UserAccountTable {
 				String[] split = line.split(",");
 				DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 				Date date = df.parse(split[4]);
-				System.out.println(split[0]);
 				userAccounts.add(new UserAccount(
 						Integer.parseInt(split[0]),
 						split[1],
