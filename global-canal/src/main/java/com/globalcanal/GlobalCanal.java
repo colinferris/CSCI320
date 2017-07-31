@@ -43,42 +43,68 @@ public class GlobalCanal {
      * U_Id is the id of the user, P_id is the product id
      *
      */
-    public static void addProductToCart(int U_id, int SC_id, int P_id){
+    public static void addProductToCart(Connection conn, int U_id, int P_id){
         double totalCost = 0.0;
-        String query = String.format("SELECT PRICE FROM PRODUCT WHERE P_ID = %d;", P_id);
+        int sc_id;
+        String query = String.format("SELECT * FROM product WHERE ID = %d;", P_id);
+        String query2 = String.format("SELECT SC_ID FROM shoppingcart WHERE U_ID = %d ORDER BY SC_ID DESC LIMIT 1;", U_id);
+
         ResultSet rs;
 
         try {
             Statement stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
-            totalCost = rs.getDouble(1);
+            rs.next();
+            totalCost = rs.getDouble("PRICE");
+            Statement stmt2 = conn.createStatement();
+            rs = stmt2.executeQuery(query2);
+            rs.next();
+            sc_id = rs.getInt(1);
+            ProductInCartTable.addProductInCart(conn, sc_id, P_id, totalCost);
+            updateCartPrice(conn, U_id, sc_id);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
 
-        ProductInCartTable.addProductInCart(conn, SC_id, P_id, totalCost);
-        updateCartPrice(U_id, SC_id);
+
     }
 
     /**
      * Removes a product from  a user's cart
      *
      * @param U_id
-     * @param SC_id
      * @param P_id
      */
-    public static void removeProductFromCart(int U_id, int SC_id, int P_id){
-        String query = String.format("DELETE FROM productincart "
-                + "WHERE SC_ID = %d AND P_ID = %d", SC_id, P_id);
+    public static void removeProductFromCart(Connection conn, int U_id, int P_id){
+        int sc_id;
+        ResultSet rs;
+        String query2 = String.format("SELECT SC_ID FROM shoppingcart WHERE U_ID = %d ORDER BY SC_ID DESC LIMIT 1;", U_id);
+        try{
 
-        try {
             Statement stmt = conn.createStatement();
-        } catch (SQLException e) {
+            rs = stmt.executeQuery(query2);
+            rs.next();
+            sc_id = rs.getInt(1);
+
+            String query = String.format("DELETE FROM productincart "
+                    + "WHERE SC_ID = %d AND P_ID = %d", sc_id, P_id);
+
+            try {
+                Statement stmt2 = conn.createStatement();
+                stmt2.executeUpdate(query);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            updateCartPrice(conn, U_id, sc_id);
+        }
+        catch(SQLException e){
             e.printStackTrace();
         }
 
-        updateCartPrice(U_id, SC_id);
+
     }
 
     /**
@@ -87,7 +113,7 @@ public class GlobalCanal {
      * @param U_id
      * @param SC_id
      */
-    public static void updateCartPrice(int U_id, int SC_id){
+    public static void updateCartPrice(Connection conn, int U_id, int SC_id){
 
         double totalPrice = 0.0;
         ResultSet rs;
@@ -107,10 +133,43 @@ public class GlobalCanal {
 
 
 
-        query = String.format("UPDATE shopping_cart "
+        query = String.format("UPDATE shoppingcart "
                 + "SET TOTALCOST = %f "
                 + "WHERE U_ID = %d AND SC_ID = %d;", totalPrice, U_id, SC_id);
+        try {
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
+
+    public static void listCartPrice(Connection conn, int U_id){
+        String query = String.format("SELECT * FROM shoppingcart WHERE U_ID = %d ORDER BY SC_ID DESC LIMIT 1;", U_id);
+        try {
+            Statement stmt = conn.createStatement();
+            ResultSet result = stmt.executeQuery(query);
+            int sc_id;
+            result.next();
+            sc_id = result.getInt("SC_ID");
+            System.out.printf("Shopping Cart %d: %s\n",
+                    result.getInt("SC_ID"),
+                    result.getString("TOTALCOST"));
+            String query2 = String.format("SELECT * FROM productincart INNER JOIN product ON productincart.P_ID = product.ID WHERE SC_ID = %d;", sc_id);
+            Statement stmt2 = conn.createStatement();
+            ResultSet result2 = stmt.executeQuery(query2);
+            while(result2.next()){
+                System.out.printf("Shopping Cart %d: %s %.2f\n",
+                        result2.getInt("ID"),
+                        result2.getString("NAME"),
+                        result2.getDouble("PRICE"));
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+
 
     /************************************
      *
@@ -131,9 +190,8 @@ public class GlobalCanal {
      * provides check to make sure users have the money to buy a product
      *
      * @param U_id
-     * @param SC_id
      */
-    public static void makeOrder(int U_id, int SC_id){
+    public static void makeOrder(Connection conn, int U_id){
 
         double credit = 0.0;
         double totalCost = 0.0;
@@ -141,14 +199,27 @@ public class GlobalCanal {
         int Payment_id = 0;
         int order_id = 0;
         int product_id;
+        int SC_id = 1;
         ResultSet rs;
+        ResultSet rs2;
 
         String query = String.format("SELECT CREDIT FROM useraccount "
                 + "WHERE ID = %d;", U_id);
+        String query2 = String.format("SELECT SC_ID FROM shoppingcart WHERE U_ID = %d ORDER BY SC_ID DESC LIMIT 1;", U_id);
+
         try {
             Statement stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
-            credit = rs.getDouble(1);
+            rs.next();
+            credit = rs.getDouble("CREDIT");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            Statement stmt2 = conn.createStatement();
+            rs2 = stmt2.executeQuery(query2);
+            rs2.next();
+            SC_id = rs2.getInt("SC_ID");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -161,6 +232,7 @@ public class GlobalCanal {
         try {
             Statement stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
+            rs.next();
             totalCost = rs.getDouble(1);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -182,7 +254,8 @@ public class GlobalCanal {
             try {
                 Statement stmt = conn.createStatement();
                 rs = stmt.executeQuery(query);
-                Shipment_id = rs.getInt(1);
+                rs.next();
+                Shipment_id = rs.getInt("S_ID");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -196,7 +269,8 @@ public class GlobalCanal {
             try {
                 Statement stmt = conn.createStatement();
                 rs = stmt.executeQuery(query);
-                Payment_id = rs.getInt(1);
+                rs.next();
+                Payment_id = rs.getInt("P_ID");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -220,18 +294,21 @@ public class GlobalCanal {
             s_dt = new Date(ms + 259200000);
 
             //generate order
-            PreviousOrderTable.addPreviousOrder(conn, rand - 1000000, dt, s_dt, totalCost, Payment_id, Shipment_id, U_id);
+            PreviousOrderTable.addPreviousOrder(conn, dt, s_dt, totalCost, Payment_id, Shipment_id, U_id);
 
             //get id of the order
-            query=String.format("SELECT ID FROM previousorder "
-                            + "WHERE DATEOFPURCHASE = %d AND DATEOFSHIPTMENT = %d "
-                            + "AND P_ID = %d AND S_ID = %d AND U_id = %d;",
-                    rand, rand+3, Payment_id, Shipment_id, U_id);
+            query=String.format("SELECT ID FROM previousorder WHERE U_ID = %d ORDER BY ID DESC LIMIT 1;", U_id);
+
+//            query=String.format("SELECT ID FROM previousorder "
+//                            + "WHERE DATEOFPURCHASE = %tF AND DATEOFSHIPMENT = %tF "
+//                            + "AND P_ID = %d AND S_ID = %d AND U_id = %d;",
+//                    dt, s_dt, Payment_id, Shipment_id, U_id);
 
             try {
                 Statement stmt = conn.createStatement();
                 rs = stmt.executeQuery(query);
-                order_id = rs.getInt(1);
+                rs.next();
+                order_id = rs.getInt("ID");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -247,7 +324,7 @@ public class GlobalCanal {
                 while(rs.next()){
                     product_id = rs.getInt(1);
                     OrderedProductTable.addOrderedProduct(conn, order_id, product_id);
-                    removeProductFromCart(U_id, SC_id, product_id);
+                    removeProductFromCart(conn, U_id, product_id);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -266,12 +343,28 @@ public class GlobalCanal {
         }
 
     }
+    public static void viewPastOrders(Connection conn, int U_id) {
+        String query = String.format("Select * FROM previousorder WHERE U_ID = %d", U_id);
+        try{
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while(rs.next()){
+                System.out.printf("Previous Order %d: %tF %.2f\n",
+                        rs.getInt("ID"),
+                        rs.getDate("DATEOFPURCHASE"),
+                        rs.getDouble("TOTALCOST"));
+            }
+        } catch (SQLException e){
+            e.printStackTrace();
+        }
 
-    /************************************
-     *
-     * END BLOCK
-     *
-     ************************************/
+    }
+
+        /************************************
+         *
+         * END BLOCK
+         *
+         ************************************/
 
 
 
@@ -290,20 +383,26 @@ public class GlobalCanal {
      * @param category
      * @return
      */
-    public static ResultSet searchProductByCategory(String category){
+    public static ResultSet searchProductByCategory(Connection conn, String category){
 
         ResultSet rs = null;
+        String query = String.format("SELECT * FROM productcategory INNER JOIN product on " +
+                "productcategory.P_ID = product.ID WHERE productcategory.NAME = \'%s\';", category);
 
-        String query = String.format("SELECT * FROM product "
-                + "WHERE P_ID = "
-                + "(SELECT P_ID FROM productcategory"
-                + "WHERE NAME = %"
-                + category
-                + "%);");
+//        String query = String.format("SELECT * FROM product WHERE P_ID = (SELECT P_ID FROM productcategory WHERE NAME = \'%s\');", category);
 
         try {
             Statement stmt = conn.createStatement();
             rs = stmt.executeQuery(query);
+            while(rs.next()){
+                System.out.printf("Product %d: %s %s %.2f \n",
+                        rs.getInt("ID"),
+                        rs.getString("product.NAME"),
+                        rs.getString("productcategory.NAME"),
+                        rs.getDouble("PRICE"));
+
+
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

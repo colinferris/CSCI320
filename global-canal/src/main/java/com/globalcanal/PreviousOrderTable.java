@@ -71,7 +71,7 @@ public class PreviousOrderTable {
 	public static void createPreviousOrderTable(Connection conn){
 		try{
 			String query = "CREATE TABLE IF NOT EXISTS previousorder("
-					+ "ID INT,"
+					+ "ID INT AUTO_INCREMENT,"
 					+ "DATEOFPURCHASE DATE,"
 					+ "DATEOFSHIPMENT DATE,"
 					+ "TOTALCOST NUMERIC(8,2),"
@@ -90,7 +90,6 @@ public class PreviousOrderTable {
 	}
 	
 	public static void addPreviousOrder(Connection conn,
-								  int id,
 								  java.util.Date dateOfPurchase,
 								  java.util.Date dateOfShipment,
 								  double totalCost,
@@ -98,9 +97,9 @@ public class PreviousOrderTable {
 								  int s_ID,
 								  int u_ID){
 		
-		String query = String.format("INSERT INTO previousorder "
-								   + "VALUES (%d,\'%tF\',\'%tF\',\'%f\',\'%d\',\'%d\',\'%d\');",
-									 id, dateOfPurchase, dateOfShipment, totalCost, p_ID, s_ID, u_ID);
+		String query = String.format("INSERT INTO previousorder (DATEOFPURCHASE, DATEOFSHIPMENT, TOTALCOST, P_ID, S_ID, U_ID) "
+								   + "VALUES (\'%tF\',\'%tF\',\'%f\',\'%d\',\'%d\',\'%d\');",
+									 dateOfPurchase, dateOfShipment, totalCost, p_ID, s_ID, u_ID);
 		try {
 			Statement stmt = conn.createStatement();
 			stmt.execute(query);

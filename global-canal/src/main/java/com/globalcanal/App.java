@@ -1,10 +1,8 @@
 package com.globalcanal;
 
 import javax.jws.soap.SOAPBinding;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.swing.plaf.nimbus.State;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,6 +107,9 @@ public class App {
                         rs.getDate("BIRTHDATE"),
                         rs.getDouble("CREDIT"));
             }
+            String query = String.format("INSERT INTO shoppingcart (U_ID, TOTALCOST) VALUES (%d, %.2f);", userAccount.getId(), 0.00);
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate(query);
 
 
         } catch (SQLException e) {
@@ -445,6 +446,74 @@ public class App {
                 globalCanal.deletePhoneNumber(conn, ua.getId());
             }
         });
+        mainMenu.addMenuItem("PR1", "Add Product to Cart", new Runnable() {
+            @Override
+            public void run() {
+                UserAccount ua = globalCanal.getUserAccount();
+                Scanner sc = new Scanner(System.in);
+                Connection conn = globalCanal.getConnection();
+                GlobalCanal gc = new GlobalCanal();
+                System.out.println("Product ID of choice: ");
+                int expirationYear = Integer.parseInt(sc.nextLine());
+                gc.addProductToCart(conn, ua.getId(), expirationYear);
+            }
+        });
+        mainMenu.addMenuItem("PR2", "Remove Product from Cart", new Runnable() {
+            @Override
+            public void run() {
+                Scanner sc = new Scanner(System.in);
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                GlobalCanal gc = new GlobalCanal();
+                System.out.println("Product ID of choice: ");
+                int P_id = Integer.parseInt(sc.nextLine());
+                gc.removeProductFromCart(conn, ua.getId(), P_id);
+            }
+        });
+        mainMenu.addMenuItem("PR3", "Display cart total Cost", new Runnable() {
+            @Override
+            public void run() {
+                Scanner sc = new Scanner(System.in);
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                GlobalCanal gc = new GlobalCanal();
+                gc.listCartPrice(conn, ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("Order", "Purchase the items in the cart: ", new Runnable() {
+            @Override
+            public void run() {
+                Scanner sc = new Scanner(System.in);
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                GlobalCanal gc = new GlobalCanal();
+                gc.makeOrder(conn, ua.getId());
+            }
+        });
+        mainMenu.addMenuItem("Search", "Search Products By Category: ", new Runnable() {
+            @Override
+            public void run() {
+                Scanner sc = new Scanner(System.in);
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                System.out.println("Enter A category: ");
+                String category = sc.nextLine();
+                GlobalCanal gc = new GlobalCanal();
+                gc.searchProductByCategory(conn, category);
+            }
+        });
+        mainMenu.addMenuItem("Order History", "View your Order History: ", new Runnable() {
+            @Override
+            public void run() {
+                Scanner sc = new Scanner(System.in);
+                UserAccount ua = globalCanal.getUserAccount();
+                Connection conn = globalCanal.getConnection();
+                GlobalCanal gc = new GlobalCanal();
+                gc.viewPastOrders(conn, ua.getId());
+            }
+        });
+
+
 
 
 
